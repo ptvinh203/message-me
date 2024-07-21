@@ -2,6 +2,7 @@ import { useStateProvider } from "@/context/StateContext";
 import { calculateTime } from "@/utils/CalculateTime";
 import React, { useEffect } from "react";
 import MessageStatus from "../common/MessageStatus";
+import ImageMessage from "./ImageMessage";
 
 function ChatContainer() {
   const [{ messages, currentChatUser, userInfo }, dispatch] = useStateProvider();
@@ -35,6 +36,7 @@ function ChatContainer() {
                       </div>
                     </div>
                   )}
+                  {message.type === "image" && <ImageMessage message={message} />}
                 </div>
               );
             })}
