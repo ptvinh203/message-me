@@ -1,4 +1,7 @@
 import { useStateProvider } from "@/context/StateContext";
+import { reducerCases } from "@/context/constants";
+import { ADD_AUDIO_MESSAGE_ROUTE } from "@/utils/ApiRoutes";
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPauseCircle, FaPlay, FaStop, FaTrash } from "react-icons/fa";
 import { MdSend } from "react-icons/md";
@@ -71,7 +74,7 @@ function CaptureAudio({ setShowAudioRecorder }) {
         recoredAudio.removeEventListener("timeupdate", updatePlaybackTime);
       };
     }
-  }, [renderedAudio]);
+  }, [recoredAudio]);
 
   const handlePlayRecording = () => {
     if (recoredAudio) {
@@ -92,6 +95,7 @@ function CaptureAudio({ setShowAudioRecorder }) {
     setCurrentPlaybackTime(0);
     setTotalDuration(0);
     setIsRecording(true);
+    setRenderedAudio(null);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -135,7 +139,34 @@ function CaptureAudio({ setShowAudioRecorder }) {
     }
   };
 
-  const sendRecording = async () => {};
+  const sendRecording = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("audio", renderedAudio);
+      const { data } = await axios.post(ADD_AUDIO_MESSAGE_ROUTE, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        params: {
+          from: userInfo?.id,
+          to: currentChatUser?.id,
+        },
+      });
+      if (data?.success && socket) {
+        socket.current.emit("send-msg", { to: currentChatUser?.id, from: userInfo?.id, message: data.data });
+        dispatch({
+          type: reducerCases.ADD_MESSAGE,
+          newMessage: {
+            ...data.data,
+          },
+          fromSelf: true,
+        });
+      }
+      setShowAudioRecorder(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const formatTime = (time) => {
     if (isNaN(time)) return "00:00";
