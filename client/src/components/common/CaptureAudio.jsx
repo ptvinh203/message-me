@@ -96,6 +96,7 @@ function CaptureAudio({ setShowAudioRecorder }) {
     setTotalDuration(0);
     setIsRecording(true);
     setRenderedAudio(null);
+    setRecordedAudio(null);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
@@ -176,13 +177,13 @@ function CaptureAudio({ setShowAudioRecorder }) {
   };
 
   return (
-    <div className="flex text-2xl w-full justify-end items-center">
+    <div className="flex text-2xl w-full justify-between items-center">
       <div className="pt-1">
         <FaTrash className="text-panel-header-icon cursor-pointer" onClick={() => setShowAudioRecorder(false)} />
       </div>
-      <div className="mx-4 py-2 px-4 text-white text-lg flex gap-3 justify-center items-center bg-search-input-container-background rounded-full drop-shadow-lg">
+      <div className="mx-4 py-2 px-4 text-white text-lg flex flex-grow gap-3 justify-center items-center bg-search-input-container-background rounded-full drop-shadow-lg">
         {isRecording ? (
-          <div className="text-red-500 animate-pulse w-60 text-center">
+          <div className="text-red-500 animate-pulse w-full text-center">
             Recording <span>{recordingDuration}</span>
           </div>
         ) : (
@@ -194,7 +195,7 @@ function CaptureAudio({ setShowAudioRecorder }) {
             )}
           </div>
         )}
-        <div className="w-60" ref={waveFormRef} hidden={isRecording} />
+        <div className="w-full" ref={waveFormRef} hidden={isRecording} />
         {recoredAudio && isPlaying && <span>{formatTime(currentPlaybackTime)}</span>}
         {recoredAudio && !isPlaying && <span>{formatTime(totalDuration)}</span>}
         <audio ref={audioRef} hidden />
@@ -205,9 +206,9 @@ function CaptureAudio({ setShowAudioRecorder }) {
             <FaPauseCircle className="text-red-500" onClick={handleStopRecording} />
           )}
         </div>
-        <div>
-          <MdSend className="text-panel-header-icon cursor-pointer mr-4" title="Send" onClick={sendRecording} />
-        </div>
+      </div>
+      <div>
+        <MdSend className="text-panel-header-icon cursor-pointer mr-4" title="Send" onClick={sendRecording} />
       </div>
     </div>
   );
