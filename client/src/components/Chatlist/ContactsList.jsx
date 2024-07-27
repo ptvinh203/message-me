@@ -8,13 +8,32 @@ import ChatLIstItem from "./ChatLIstItem";
 
 function ContactsList() {
   const [allContacts, setAllContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchContacts, setSearchContacts] = useState([]);
   const [{}, dispatch] = useStateProvider();
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filteredData = {};
+      Object.keys(allContacts).forEach((key) => {
+        filteredData[key] = allContacts[key].filter((contact) =>
+          contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+      setSearchContacts(filteredData);
+    } else {
+      setSearchContacts(allContacts);
+    }
+  }, [searchTerm]);
 
   useEffect(() => {
     const getContacts = async () => {
       try {
         const { data } = await axios.get(GET_ALL_CONTACTS_ROUTE);
-        if (data?.data) setAllContacts(data.data);
+        if (data?.data) {
+          setAllContacts(data.data);
+          setSearchContacts(data.data);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -46,14 +65,16 @@ function ContactsList() {
                 type="text"
                 placeholder="Search contacts"
                 className="bg-transparent text-sm focus:outline-none text-white w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
         </div>
-        {Object.entries(allContacts).map(([initialLetter, userList]) => {
+        {Object.entries(searchContacts).map(([initialLetter, userList]) => {
           return (
             <div key={Date.now() + initialLetter}>
-              <div className="text-teal-light pl-10 py-5">{initialLetter}</div>
+              {userList.length > 0 && <div className="text-teal-light pl-10 py-5">{initialLetter}</div>}
               {userList.map((contact) => {
                 return <ChatLIstItem data={contact} isContactPage={true} key={contact.id} />;
               })}
